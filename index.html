@@ -6,6 +6,7 @@
     <title>Terrasje bingo</title>
   </head>
   <body>
+    <h1 class="title">Terrasje bingo</h1>
     <div id="bingo-card"></div>
     <script>
       let options = [
@@ -55,7 +56,7 @@
         },
         {
           id: 12,
-          value: "Voetbalshirtje van Spaanse club",
+          value: "Barca shirtje",
         },
         {
           id: 13,
@@ -135,6 +136,9 @@
         const optionElement = document.createElement("div");
         if (i === 12) {
           optionElement.classList.add("bingo-card-option__free");
+          optionElement.classList.add("bingo-card-option");
+          optionElement.classList.add("bingo-card-option__clicked");
+          optionElement.textContent = "X";
         } else {
           optionElement.classList.add("bingo-card-option");
           optionElement.textContent = option.value;
@@ -165,13 +169,21 @@
       body {
         background-color: #282a3a;
       }
-
+      .title {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        margin-top: 1rem;
+      }
       #bingo-card {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        margin: 1rem;
-        max-height: 100vh;
+        width: min(90vw, 90vh);
+        height: min(90vw, 90vh);
         position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
 
       .bingo-card-option {
