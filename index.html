@@ -116,7 +116,43 @@
 
       const bingoCardOptions = 25;
       let userBingoOptions = [];
+
+      // URL state management functions
+      const saveBingoStateToURL = (bingoOptions) => {
+        const stateData = bingoOptions.map((option) => ({
+          id: option.id,
+          value: option.value,
+          clicked: option.clicked,
+        }));
+        const encodedState = btoa(JSON.stringify(stateData));
+        const url = new URL(window.location);
+        url.searchParams.set("bingo", encodedState);
+        window.history.replaceState({}, "", url);
+      };
+
+      const loadBingoStateFromURL = () => {
+        const url = new URL(window.location);
+        const encodedState = url.searchParams.get("bingo");
+        if (encodedState) {
+          try {
+            const decodedState = JSON.parse(atob(encodedState));
+            return decodedState;
+          } catch (e) {
+            console.error("Failed to decode bingo state from URL:", e);
+            return null;
+          }
+        }
+        return null;
+      };
+
       const getUserBingoOptions = () => {
+        // First try to load from URL
+        const savedState = loadBingoStateFromURL();
+        if (savedState && savedState.length === bingoCardOptions) {
+          return savedState;
+        }
+
+        // If no saved state, generate new options
         const tempUserOptions = [];
         for (let i = 0; i < bingoCardOptions; i++) {
           let randomOption = getRandomOption();
@@ -131,6 +167,12 @@
 
       const bingoCard = document.getElementById("bingo-card");
       userBingoOptions = getUserBingoOptions();
+
+      // Save initial state to URL if it wasn't loaded from URL
+      if (!loadBingoStateFromURL()) {
+        saveBingoStateToURL(userBingoOptions);
+      }
+
       for (let i = 0; i < bingoCardOptions; i++) {
         const option = userBingoOptions[i];
         const optionElement = document.createElement("div");
@@ -142,6 +184,12 @@
         } else {
           optionElement.classList.add("bingo-card-option");
           optionElement.textContent = option.value;
+
+          // Apply clicked state if loaded from URL
+          if (option.clicked) {
+            optionElement.classList.add("bingo-card-option__clicked");
+          }
+
           optionElement.addEventListener("click", () => {
             if (
               optionElement.classList.contains("bingo-card-option__clicked")
@@ -152,6 +200,9 @@
               optionElement.classList.add("bingo-card-option__clicked");
               option.clicked = true;
             }
+
+            // Save state to URL after each click
+            saveBingoStateToURL(userBingoOptions);
           });
         }
         bingoCard.appendChild(optionElement);
